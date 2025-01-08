@@ -1,4 +1,4 @@
-## GX LTE 4G Setup
+# GX LTE 4G Setup
 
 1. Mount the device in a place that is not covered by metal objects.
 2. Mount the included antenna to the SMA connector labeled LTE.
