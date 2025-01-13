@@ -1,57 +1,58 @@
 name: ci
-
 on:
   push:
     branches:
       - master
       - main
-
 permissions:
   contents: write
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Configure Git Credentials
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
-
       - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
-
       - uses: actions/cache@v4
         with:
           key: mkdocs-material-${{ env.cache_id }}
           path: .cache
           restore-keys: |
             mkdocs-material-
-
       - run: pip install mkdocs-material
-
-      # Add WeasyPrint dependencies and install them
-      - name: Install WeasyPrint Dependencies
+      - run: mkdocs gh-deploy --forcename: ci
+on:
+  push:
+    branches:
+      - master
+      - main
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Git Credentials
         run: |
-          sudo apt-get install -y libpango1.0-dev libcairo2-dev
-
-      - run: pip install weasyprint
-
-      # Generate PDFs with WeasyPrint (assuming you have a script to generate them)
-      - name: Generate PDFs with WeasyPrint
-        run: |
-          python generate_pdfs.py  # Replace with your script to generate PDFs
-
-      # Optionally, commit the generated PDFs back to the repository
-      - name: Commit generated PDFs
-        run: |
-          git add .
-          git commit -m "Generate PDFs"
-          git push
-
-      - run: mkdocs gh-deploy --force
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+      - uses: actions/cache@v4
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+      - run: pip install -r requirements.txt  # Install all dependencies including mkdocs-pdf-export-plugin
+      - run: mkdocs build  # This will generate the PDFs if you configured the plugin
+      - run: mkdocs gh-deploy --force  # Deploy the site and PDF
